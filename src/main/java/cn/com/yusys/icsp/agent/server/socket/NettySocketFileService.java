@@ -47,7 +47,14 @@ public class NettySocketFileService {
 						socketChannel.pipeline().addLast(new ObjectEncoder());
 						socketChannel.pipeline().addLast(new ObjectDecoder(Integer.MAX_VALUE,
 								ClassResolvers.weakCachingConcurrentResolver(null)));
+						//文件上传
 						socketChannel.pipeline().addLast(new FileSplitUploadServerHandler());
+						// 新增ChunkedHandler，主要作用是支持异步发送大的码流（例如大文件传输），但是不占用过多的内存，防止发生java内存溢出错误
+						//socketChannel.pipeline().addLast(new ChunkedWriteHandler());
+// 用于下载文件
+						socketChannel.pipeline().addLast(new HttpDownloadHandler());
+
+
 					}
 				}).option(ChannelOption.SO_BACKLOG, 1048576);// BACKLOG用于构造服务端套接字ServerSocket对象，标识当服务器请求处理线程全满时，用于临时存放已完成三次握手的请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50
 		// .childOption(ChannelOption.SO_KEEPALIVE, true); //
